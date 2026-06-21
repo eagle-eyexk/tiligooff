@@ -12,9 +12,34 @@ workflows:
       groups:
         - code-signing
     triggering:
-      events: [push]
-      branch_patterns: [{pattern: main}]
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
     scripts:
+      - name: Auto-fix project structure
+        script: |
+          echo "=== Fixing project structure ==="
+          if [ ! -f "index.html" ]; then
+            cat > index.html << 'HTMLEOF'
+          <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>TiliGo</title></head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>
+          HTMLEOF
+          fi
+          if [ -f "src/index.css" ] && [ ! -f "index.css" ]; then
+            cp src/index.css index.css
+          fi
+          if [ -f "src/index.css" ] && [ ! -f "src/index.css" ]; then
+            true
+          fi
+          mkdir -p src
+          if [ -f "main.jsx" ] && [ ! -f "src/main.jsx" ]; then
+            cp main.jsx src/main.jsx
+          fi
+          if [ -f "App.jsx" ] && [ ! -f "src/App.jsx" ]; then
+            cp App.jsx src/App.jsx
+          fi
+          touch index.css
+          echo "=== Structure fixed ==="
       - name: Install and build
         script: |
           npm install
